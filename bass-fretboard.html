@@ -10,33 +10,42 @@
       flex-direction: column;
       align-items: center;
       padding: 2rem;
-      background-color: #f9f9f9;
+      background-color: #111;
+      color: #eee;
     }
     label, input {
       margin: 0.5rem;
       font-size: 1rem;
     }
+    input {
+      background-color: #222;
+      color: #eee;
+      border: 1px solid #555;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+    }
     .fretboard {
       display: grid;
       grid-template-columns: 60px repeat(4, 60px);
-      border: 2px solid #000;
+      border: 2px solid #444;
       border-radius: 10px;
       overflow: hidden;
-      background: #fff;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      background: #222;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
       margin-top: 1rem;
     }
     .fretboard > div {
-      border: 1px solid #ccc;
+      border: 1px solid #333;
       padding: 6px;
       text-align: center;
     }
     .fret-number {
-      background-color: #f0f0f0;
+      background-color: #333;
       font-weight: bold;
+      color: #ccc;
     }
     .highlight {
-      background-color: #ffc107;
+      background-color: #ff9800;
       font-weight: bold;
       color: #000;
     }
