@@ -10,7 +10,7 @@
       flex-direction: column;
       align-items: center;
       padding: 2rem;
-      background-color: #111;
+      background-color: #121212;
       color: #eee;
     }
     label, input {
@@ -18,10 +18,10 @@
       font-size: 1rem;
     }
     input {
-      background-color: #222;
+      padding: 0.25rem 0.5rem;
+      background-color: #1e1e1e;
       color: #eee;
-      border: 1px solid #555;
-      padding: 0.3rem 0.5rem;
+      border: 1px solid #444;
       border-radius: 4px;
     }
     .fretboard {
@@ -30,8 +30,8 @@
       border: 2px solid #444;
       border-radius: 10px;
       overflow: hidden;
-      background: #222;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      background: #1e1e1e;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
       margin-top: 1rem;
     }
     .fretboard > div {
@@ -40,12 +40,11 @@
       text-align: center;
     }
     .fret-number {
-      background-color: #333;
+      background-color: #222;
       font-weight: bold;
-      color: #ccc;
     }
     .highlight {
-      background-color: #ff9800;
+      background-color: #ffc107;
       font-weight: bold;
       color: #000;
     }
@@ -53,8 +52,8 @@
 </head>
 <body>
   <h2>Bass 指板圖</h2>
-  <label for="degree">輸入音階級數（例如 2、3b、1b）：</label>
-  <input type="text" id="degree" placeholder="例如 2b" oninput="highlightDegree()" />
+  <label for="degree">輸入音階級數（例如 2、3b、1b，可用逗號分隔多個）：</label>
+  <input type="text" id="degree" placeholder="例如 2b, 3" oninput="highlightDegree()" />
 
   <div class="fretboard" id="fretboard"></div>
 
@@ -77,7 +76,7 @@
       return notes[index];
     }
 
-    function renderFretboard(highlightNote = '') {
+    function renderFretboard(highlightNotes = []) {
       const fretboard = document.getElementById('fretboard');
       fretboard.innerHTML = '';
 
@@ -89,7 +88,6 @@
         fretboard.appendChild(div);
       });
 
-      // 21 frets
       for (let fret = 0; fret <= 20; fret++) {
         const fretLabel = document.createElement('div');
         fretLabel.textContent = fret;
@@ -100,7 +98,7 @@
           const note = getNoteAt(s, fret);
           const div = document.createElement('div');
           div.textContent = note;
-          if (note === highlightNote) {
+          if (highlightNotes.includes(note)) {
             div.classList.add('highlight');
           }
           fretboard.appendChild(div);
@@ -110,11 +108,11 @@
 
     function highlightDegree() {
       const input = document.getElementById('degree').value.trim();
-      const note = degreeMap[input];
-      renderFretboard(note);
+      const degrees = input.split(',').map(d => d.trim());
+      const notes = degrees.map(d => degreeMap[d]).filter(Boolean);
+      renderFretboard(notes);
     }
 
-    // 初始顯示
     renderFretboard();
   </script>
 </body>
