@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bass 指板圖 - 音名標示</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      background-color: #f9f9f9;
+    }
+    label, input {
+      margin: 0.5rem;
+      font-size: 1rem;
+    }
+    .fretboard {
+      display: grid;
+      grid-template-columns: 60px repeat(4, 60px);
+      border: 2px solid #000;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 1rem;
+    }
+    .fretboard > div {
+      border: 1px solid #ccc;
+      padding: 6px;
+      text-align: center;
+    }
+    .fret-number {
+      background-color: #f0f0f0;
+      font-weight: bold;
+    }
+    .highlight {
+      background-color: #ffc107;
+      font-weight: bold;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <h2>Bass 指板圖</h2>
+  <label for="degree">輸入音階級數（例如 2、3b、1b）：</label>
+  <input type="text" id="degree" placeholder="例如 2b" oninput="highlightDegree()" />
+
+  <div class="fretboard" id="fretboard"></div>
+
+  <script>
+    const strings = ['E', 'A', 'D', 'G'];
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+    const degreeMap = {
+      '1': 'C', '1b': 'B',
+      '2': 'D', '2b': 'C#',
+      '3': 'E', '3b': 'D#',
+      '4': 'F',
+      '5': 'G',
+      '6': 'A', '6b': 'G#',
+      '7': 'B', '7b': 'A#'
+    };
+
+    function getNoteAt(stringNote, fret) {
+      const index = (notes.indexOf(stringNote) + fret) % 12;
+      return notes[index];
+    }
+
+    function renderFretboard(highlightNote = '') {
+      const fretboard = document.getElementById('fretboard');
+      fretboard.innerHTML = '';
+
+      // Header row
+      fretboard.appendChild(document.createElement('div'));
+      strings.forEach(s => {
+        const div = document.createElement('div');
+        div.textContent = s;
+        fretboard.appendChild(div);
+      });
+
+      // 21 frets
+      for (let fret = 0; fret <= 20; fret++) {
+        const fretLabel = document.createElement('div');
+        fretLabel.textContent = fret;
+        fretLabel.className = 'fret-number';
+        fretboard.appendChild(fretLabel);
+
+        strings.forEach(s => {
+          const note = getNoteAt(s, fret);
+          const div = document.createElement('div');
+          div.textContent = note;
+          if (note === highlightNote) {
+            div.classList.add('highlight');
+          }
+          fretboard.appendChild(div);
+        });
+      }
+    }
+
+    function highlightDegree() {
+      const input = document.getElementById('degree').value.trim();
+      const note = degreeMap[input];
+      renderFretboard(note);
+    }
+
+    // 初始顯示
+    renderFretboard();
+  </script>
+</body>
+</html>
