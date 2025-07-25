@@ -11,19 +11,44 @@
       align-items: center;
       padding: 2rem;
       background-color: #121212;
-      color: #eee;
+      color: #f1f1f1;
     }
-    label, input {
-      margin: 0.5rem;
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin: 1rem 0;
+      align-items: center;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    label {
+      margin: 0;
       font-size: 1rem;
+      min-width: 200px;
+      text-align: right;
     }
-    input {
-      padding: 0.25rem 0.5rem;
+
+    select, input {
+      margin: 0;
+      font-size: 1rem;
+      width: 200px;
+    }
+
+    input, select {
       background-color: #1e1e1e;
-      color: #eee;
-      border: 1px solid #444;
+      color: #f1f1f1;
+      border: 1px solid #333;
+      padding: 0.5rem;
       border-radius: 4px;
     }
+
     .fretboard {
       display: grid;
       grid-template-columns: 60px repeat(4, 60px);
@@ -31,18 +56,21 @@
       border-radius: 10px;
       overflow: hidden;
       background: #1e1e1e;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
       margin-top: 1rem;
     }
+
     .fretboard > div {
       border: 1px solid #333;
       padding: 6px;
       text-align: center;
     }
+
     .fret-number {
-      background-color: #222;
+      background-color: #2a2a2a;
       font-weight: bold;
     }
+
     .highlight {
       background-color: #ffc107;
       font-weight: bold;
@@ -52,8 +80,47 @@
 </head>
 <body>
   <h2>Bass 指板圖</h2>
-  <label for="degree">輸入音階級數（例如 2、3b、1b，可用逗號分隔多個）：</label>
-  <input type="text" id="degree" placeholder="例如 2b, 3" oninput="highlightDegree()" />
+
+  <div class="controls">
+    <div class="control-row">
+      <label for="key">選擇主調（Key）：</label>
+      <select id="key" onchange="highlightDegree()">
+        <option value="C">C</option>
+        <option value="Cm">Cm</option>
+        <option value="C#">C#</option>
+        <option value="C#m">C#m</option>
+        <option value="Db">Db</option>
+        <option value="Dbm">Dbm</option>
+        <option value="D">D</option>
+        <option value="Dm">Dm</option>
+        <option value="Eb">Eb</option>
+        <option value="Ebm">Ebm</option>
+        <option value="E">E</option>
+        <option value="Em">Em</option>
+        <option value="F">F</option>
+        <option value="Fm">Fm</option>
+        <option value="F#">F#</option>
+        <option value="F#m">F#m</option>
+        <option value="Gb">Gb</option>
+        <option value="Gbm">Gbm</option>
+        <option value="G">G</option>
+        <option value="Gm">Gm</option>
+        <option value="Ab">Ab</option>
+        <option value="Abm">Abm</option>
+        <option value="A">A</option>幾
+        <option value="Am">Am</option>
+        <option value="Bb">Bb</option>
+        <option value="Bbm">Bbm</option>
+        <option value="B">B</option>
+        <option value="Bm">Bm</option>
+      </select>
+    </div>
+
+    <div class="control-row">
+      <label for="degree">輸入音階級數（例如 2、3b、4b、6）：</label>
+      <input type="text" id="degree" placeholder="例如 2b, 4, 6" oninput="highlightDegree()" />
+    </div>
+  </div>
 
   <div class="fretboard" id="fretboard"></div>
 
@@ -61,14 +128,12 @@
     const strings = ['E', 'A', 'D', 'G'];
     const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-    const degreeMap = {
-      '1': 'C', '1b': 'B',
-      '2': 'D', '2b': 'C#',
-      '3': 'E', '3b': 'D#',
-      '4': 'F',
-      '5': 'G',
-      '6': 'A', '6b': 'G#',
-      '7': 'B', '7b': 'A#'
+    const enharmonics = {
+      'C#': 'Db', 'Db': 'C#',
+      'D#': 'Eb', 'Eb': 'D#',
+      'F#': 'Gb', 'Gb': 'F#',
+      'G#': 'Ab', 'Ab': 'G#',
+      'A#': 'Bb', 'Bb': 'A#'
     };
 
     function getNoteAt(stringNote, fret) {
@@ -76,11 +141,58 @@
       return notes[index];
     }
 
+    function getScaleNotes(key) {
+      const majorSteps = [2, 2, 1, 2, 2, 2, 1];
+      const minorSteps = [2, 1, 2, 2, 1, 2, 2];
+      const scale = [];
+
+      const isMinor = key.includes('m');
+      const root = isMinor ? key.slice(0, -1) : key;
+      const steps = isMinor ? minorSteps : majorSteps;
+      let index = notes.indexOf(root);
+      
+      for (let step of steps) {
+        scale.push(notes[index % 12]);
+        index += step;
+      }
+      return scale;
+    }
+
+    function getDegreeMap(key) {
+      const scale = getScaleNotes(key);
+      const map = {
+        '1b': notes[(notes.indexOf(scale[0]) + 11) % 12],
+        '1': scale[0],
+        '2b': notes[(notes.indexOf(scale[1]) + 11) % 12],
+        '2': scale[1],
+        '3b': notes[(notes.indexOf(scale[2]) + 11) % 12],
+        '3': scale[2],
+        '4b': notes[(notes.indexOf(scale[3]) + 11) % 12],
+        '4': scale[3],
+        '5b': notes[(notes.indexOf(scale[4]) + 11) % 12],
+        '5': scale[4],
+        '6b': notes[(notes.indexOf(scale[5]) + 11) % 12],
+        '6': scale[5],
+        '7b': notes[(notes.indexOf(scale[6]) + 11) % 12],
+        '7': scale[6]
+      };
+
+      Object.entries(map).forEach(([deg, note]) => {
+        if (enharmonics[note]) {
+          map[deg] = [note, enharmonics[note]];
+        } else {
+          map[deg] = [note];
+        }
+      });
+
+      return map;
+    }
+
     function renderFretboard(highlightNotes = []) {
       const fretboard = document.getElementById('fretboard');
       fretboard.innerHTML = '';
 
-      // Header row
+      // Header
       fretboard.appendChild(document.createElement('div'));
       strings.forEach(s => {
         const div = document.createElement('div');
@@ -88,6 +200,7 @@
         fretboard.appendChild(div);
       });
 
+      // Frets 0–20
       for (let fret = 0; fret <= 20; fret++) {
         const fretLabel = document.createElement('div');
         fretLabel.textContent = fret;
@@ -96,24 +209,43 @@
 
         strings.forEach(s => {
           const note = getNoteAt(s, fret);
+          const enharmonic = enharmonics[note];
           const div = document.createElement('div');
-          div.textContent = note;
-          if (highlightNotes.includes(note)) {
+
+          const isHighlighted =
+            highlightNotes.includes(note) ||
+            (enharmonic && highlightNotes.includes(enharmonic));
+
+          if (isHighlighted) {
             div.classList.add('highlight');
+            div.textContent = enharmonic ? `${note}/${enharmonic}` : note;
+          } else {
+            div.textContent = note;
           }
+
           fretboard.appendChild(div);
         });
       }
     }
 
     function highlightDegree() {
+      const key = document.getElementById('key').value;
       const input = document.getElementById('degree').value.trim();
       const degrees = input.split(',').map(d => d.trim());
-      const notes = degrees.map(d => degreeMap[d]).filter(Boolean);
-      renderFretboard(notes);
+      const degreeMap = getDegreeMap(key);
+
+      let highlightNotes = [];
+      degrees.forEach(d => {
+        if (degreeMap[d]) {
+          highlightNotes = highlightNotes.concat(degreeMap[d]);
+        }
+      });
+
+      renderFretboard(highlightNotes);
     }
 
     renderFretboard();
   </script>
+
 </body>
 </html>
